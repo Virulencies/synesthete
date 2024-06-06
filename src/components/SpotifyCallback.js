@@ -1,6 +1,9 @@
 import React, { useEffect } from 'react';
+import { useSpotifyAuth } from './SpotifyContext';
 
 const SpotifyCallback = () => {
+    const { saveAccessToken } = useSpotifyAuth();
+
     useEffect(() => {
         const hash = window.location.hash
             .substring(1)
@@ -14,8 +17,12 @@ const SpotifyCallback = () => {
             }, {});
         window.location.hash = '';
 
+        if (hash.access_token) {
+            saveAccessToken(hash.access_token);
+        }
+
         console.log('Access Token:', hash.access_token);
-    }, []);
+    }, [saveAccessToken]);
 
     return <div>Loading...</div>;
 };
