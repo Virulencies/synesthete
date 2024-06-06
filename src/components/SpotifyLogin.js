@@ -12,7 +12,7 @@ const SpotifyLogin = () => {
 
     const handleLogin = () => {
         const url = new URL('https://accounts.spotify.com/authorize');
-        url.searchParams.append('response_type', 'code');
+        url.searchParams.append('response_type', 'token');
         url.searchParams.append('client_id', clientId);
         url.searchParams.append('scope', scopes.join(' '));
         url.searchParams.append('redirect_uri', redirectUri);
