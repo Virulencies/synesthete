@@ -11,14 +11,18 @@ const SpotifyLogin = () => {
     ];
 
     const handleLogin = () => {
+        const stateValue = Math.random().toString(36).substring(2, 15); // generate a random state value
+        sessionStorage.setItem('spotify_auth_state', stateValue); // store it locally
+    
         const url = new URL('https://accounts.spotify.com/authorize');
         url.searchParams.append('response_type', 'token');
         url.searchParams.append('client_id', clientId);
         url.searchParams.append('scope', scopes.join(' '));
         url.searchParams.append('redirect_uri', redirectUri);
-        url.searchParams.append('state', 'some_random_state');  // an optional bit for enhanced security purposes
-
-        window.location.href = url.toString();  // redirects the user to spotify's authorization page
+        url.searchParams.append('state', stateValue);
+    
+        window.location.href = url.toString(); // redirects to Spotify's authorization page
+        console.log("Redirecting with state:", stateValue); // log the state used for redirect
     };
 
     return (

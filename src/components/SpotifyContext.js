@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 const SpotifyAuthContext = createContext();
 
@@ -8,6 +8,7 @@ export const SpotifyAuthProvider = ({ children }) => {
     const [accessToken, setAccessToken] = useState(null);
 
     const saveAccessToken = (token) => {
+        console.log("Saving access token:", token); 
         setAccessToken(token);
     };
 
