@@ -10,7 +10,7 @@ function App() {
             <SpotifyAuthProvider>
                 <Routes>
                     <Route path="/callback" component={SpotifyCallback} />
-                    <Route path="/" exact component={SpotifyLogin} />
+                    <Route path="/" element={<SpotifyLogin />} />
                 </Routes>
             </SpotifyAuthProvider>
         </Router>

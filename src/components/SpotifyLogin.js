@@ -1,5 +1,5 @@
 import React from 'react';
-import SpotifyWebApi from 'spotify-web-api-js';
+//import SpotifyWebApi from 'spotify-web-api-js';
 
 const SpotifyLogin = () => {
     const clientId = '3c807510a4d541cc919356740ed22cf1';
