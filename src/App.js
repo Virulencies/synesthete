@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { SpotifyAuthProvider } from './components/SpotifyContext';
 import SpotifyLogin from './components/SpotifyLogin';
 import SpotifyCallback from './components/SpotifyCallback';
@@ -8,10 +8,10 @@ function App() {
     return (
         <Router>
             <SpotifyAuthProvider>
-                <Switch>
+                <Routes>
                     <Route path="/callback" component={SpotifyCallback} />
                     <Route path="/" exact component={SpotifyLogin} />
-                </Switch>
+                </Routes>
             </SpotifyAuthProvider>
         </Router>
     );
