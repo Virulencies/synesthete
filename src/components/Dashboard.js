@@ -24,13 +24,69 @@ const Dashboard = () => {
     };
 
     const handlePlayTrack = async (trackUri) => {
+        const token = accessToken || sessionStorage.getItem('access_token');
+        if (!token) {
+            console.error('No access token available');
+            return;
+        }
+        console.log("Using access token for playback:", token);
+        console.log("Track URI:", trackUri);
+
+        const requestData = {
+            uris: [trackUri]
+        };
+
+        console.log("Request Data:", requestData);
+
+        const devicesResponse = await fetch(`https://api.spotify.com/v1/me/player/devices`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        const devicesData = await devicesResponse.json();
+        const activeDevice = devicesData.devices.find(device => device.is_active);
+
+        if (!activeDevice) {
+            console.error('No active device available for playback');
+            const availableDevice = devicesData.devices[0];
+            if (availableDevice) {
+                console.log('Transferring playback to available device:', availableDevice.id);
+                await fetch(`https://api.spotify.com/v1/me/player`, {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ device_ids: [availableDevice.id], play: true }),
+                    cache: "no-cache"
+                });
+            } else {
+                alert('No active device found. Please open Spotify on one of your devices.');
+                return;
+            }
+        }
+
         await fetch(`https://api.spotify.com/v1/me/player/play`, {
             method: 'PUT',
             headers: {
-                Authorization: `Bearer ${accessToken}`,
+                Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ uris: [trackUri] })
+            body: JSON.stringify(requestData),
+            cache: "no-cache"
+        }).then(response => {
+            if (!response.ok) {
+                console.error('Failed to play track', response.status, response.statusText);
+                if (response.status === 401) {
+                    console.log('Token expired or invalid, please re-authenticate');
+                } else if (response.status === 400) {
+                    console.log('Bad Request: The request was malformed');
+                }
+            } else {
+                console.log('Track played successfully');
+            }
+        }).catch(error => {
+            console.error('Error playing track:', error);
         });
     };
 
