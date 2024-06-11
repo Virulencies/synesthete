@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useSpotifyAuth } from './SpotifyContext';
-import Visualizer from './Visualizer'; // Import the Visualizer component
+import Visualizer from './Visualizer'; // import the Visualizer component
 
 const Dashboard = () => {
     const { accessToken, userInfo, fetchSpotifyData } = useSpotifyAuth();
     const [tracks, setTracks] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [audioFeatures, setAudioFeatures] = useState(null);
-    const [isPlaying, setIsPlaying] = useState(false); // Track if music is playing
+    const [isPlaying, setIsPlaying] = useState(false); // track if music is playing
+    const [colorScheme, setColorScheme] = useState('default'); // color scheme controlled by the dropdown
     const playerRef = useRef(null);
     const [player, setPlayer] = useState(null);
 
@@ -27,7 +28,7 @@ const Dashboard = () => {
 
             newPlayer.addListener('player_state_changed', async state => {
                 console.log(state);
-                setIsPlaying(!state.paused); // Update playing state
+                setIsPlaying(!state.paused); // update playing state
                 if (state && state.track_window && state.track_window.current_track) {
                     const trackId = state.track_window.current_track.id;
                     const features = await getAudioFeatures(trackId);
@@ -35,15 +36,16 @@ const Dashboard = () => {
                 }
             });
 
-            newPlayer.addListener('ready', ({ device_id }) => {
+            newPlayer.addListener('ready', async ({ device_id }) => {
                 console.log('Ready with Device ID', device_id);
                 playerRef.current = newPlayer;
                 setPlayer(newPlayer);
+                await transferPlaybackToDevice(device_id); // supposed to transfer playback to this device, but sometimes buggy
             });
 
             newPlayer.addListener('not_ready', ({ device_id }) => {
                 console.log('Device ID has gone offline', device_id);
-                playerRef.current = null; // Reset player reference when device goes offline
+                playerRef.current = null; // should reset the player reference when device goes offline, only sometimes works seemingly
             });
 
             newPlayer.connect();
@@ -135,6 +137,25 @@ const Dashboard = () => {
         });
     };
 
+    const transferPlaybackToDevice = async (device_id) => {
+        await fetch(`https://api.spotify.com/v1/me/player`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ device_ids: [device_id], play: true })
+        }).then(response => {
+            if (!response.ok) {
+                console.error('Failed to transfer playback', response.status, response.statusText);
+            } else {
+                console.log('Playback transferred to Web Playback SDK device');
+            }
+        }).catch(error => {
+            console.error('Error transferring playback:', error);
+        });
+    };
+
     const getAudioFeatures = async (trackId) => {
         if (!accessToken) {
             console.error('No access token available');
@@ -153,7 +174,7 @@ const Dashboard = () => {
         }
 
         const data = await response.json();
-        console.log('Audio Features:', data); // Log the audio features
+        console.log('Audio Features:', data);
         return data;
     };
 
@@ -165,6 +186,18 @@ const Dashboard = () => {
         } else {
             console.error('Player is not ready');
         }
+    };
+
+    const getPlayerState = async () => {
+        if (playerRef.current) {
+            const state = await playerRef.current.getCurrentState();
+            return state;
+        }
+        return null;
+    };
+
+    const handleColorSchemeChange = (event) => {
+        setColorScheme(event.target.value);
     };
 
     return (
@@ -201,8 +234,16 @@ const Dashboard = () => {
                     {/* Add more audio features as needed */}
                 </div>
             )}
-            <div style={{ width: '100%', height: '500px' }}> {/* Container for Visualizer */}
-                <Visualizer audioFeatures={audioFeatures} isPlaying={isPlaying} /> {/* Add the Visualizer component */}
+            <div style={{ width: '100%', height: '500px' }}> {/* container for the Visualizer */}
+                <Visualizer audioFeatures={audioFeatures} isPlaying={isPlaying} getPlayerState={getPlayerState} colorScheme={colorScheme} /> {/* add the Visualizer component */}
+            </div>
+            <div>
+                <label htmlFor="colorScheme">Color Scheme:</label>
+                <select id="colorScheme" value={colorScheme} onChange={handleColorSchemeChange}>
+                    <option value="default">Default</option>
+                    <option value="cool">Cool</option>
+                    <option value="warm">Warm</option>
+                </select>
             </div>
         </div>
     );
