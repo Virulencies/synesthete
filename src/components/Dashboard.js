@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useSpotifyAuth } from './SpotifyContext';
-import Visualizer from './Visualizer';
+import Visualizer from './Visualizer'; // Import the Visualizer component
 
 const Dashboard = () => {
     const { accessToken, userInfo, fetchSpotifyData } = useSpotifyAuth();
     const [tracks, setTracks] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [audioFeatures, setAudioFeatures] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(false); // Track if music is playing
     const playerRef = useRef(null);
     const [player, setPlayer] = useState(null);
 
@@ -26,6 +27,7 @@ const Dashboard = () => {
 
             newPlayer.addListener('player_state_changed', async state => {
                 console.log(state);
+                setIsPlaying(!state.paused); // Update playing state
                 if (state && state.track_window && state.track_window.current_track) {
                     const trackId = state.track_window.current_track.id;
                     const features = await getAudioFeatures(trackId);
@@ -41,6 +43,7 @@ const Dashboard = () => {
 
             newPlayer.addListener('not_ready', ({ device_id }) => {
                 console.log('Device ID has gone offline', device_id);
+                playerRef.current = null; // Reset player reference when device goes offline
             });
 
             newPlayer.connect();
@@ -150,7 +153,7 @@ const Dashboard = () => {
         }
 
         const data = await response.json();
-        console.log('Audio Features:', data); // log audio features
+        console.log('Audio Features:', data); // Log the audio features
         return data;
     };
 
@@ -198,8 +201,8 @@ const Dashboard = () => {
                     {/* Add more audio features as needed */}
                 </div>
             )}
-            <div style={{ width: '100%', height: '500px' }}> {/* container for Visualizer */}
-                <Visualizer audioFeatures={audioFeatures} /> {/* adds the Visualizer component */}
+            <div style={{ width: '100%', height: '500px' }}> {/* Container for Visualizer */}
+                <Visualizer audioFeatures={audioFeatures} isPlaying={isPlaying} /> {/* Add the Visualizer component */}
             </div>
         </div>
     );
