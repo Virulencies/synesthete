@@ -5,6 +5,7 @@ const Dashboard = () => {
     const { accessToken, userInfo, fetchSpotifyData } = useSpotifyAuth();
     const [tracks, setTracks] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [audioFeatures, setAudioFeatures] = useState(null);
     const playerRef = useRef(null);
     const [player, setPlayer] = useState(null);
 
@@ -22,7 +23,14 @@ const Dashboard = () => {
             newPlayer.addListener('account_error', ({ message }) => { console.error(message); });
             newPlayer.addListener('playback_error', ({ message }) => { console.error(message); });
 
-            newPlayer.addListener('player_state_changed', state => { console.log(state); });
+            newPlayer.addListener('player_state_changed', async state => {
+                console.log(state);
+                if (state && state.track_window && state.track_window.current_track) {
+                    const trackId = state.track_window.current_track.id;
+                    const features = await getAudioFeatures(trackId);
+                    setAudioFeatures(features);
+                }
+            });
 
             newPlayer.addListener('ready', ({ device_id }) => {
                 console.log('Ready with Device ID', device_id);
@@ -123,6 +131,29 @@ const Dashboard = () => {
         });
     };
 
+    // get audio info
+    const getAudioFeatures = async (trackId) => {
+        if (!accessToken) {
+            console.error('No access token available');
+            return null;
+        }
+
+        const response = await fetch(`https://api.spotify.com/v1/audio-features/${trackId}`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
+
+        if (!response.ok) {
+            console.error('Failed to fetch audio features', response.status, response.statusText);
+            return null;
+        }
+
+        const data = await response.json();
+        console.log('Audio Features:', data); //log audio features
+        return data;
+    };
+
     const handleTogglePlay = () => {
         if (player) {
             player.togglePlay().catch(error => {
@@ -157,6 +188,16 @@ const Dashboard = () => {
                 <div id="player-status"></div>
                 <button onClick={handleTogglePlay}>Play/Pause</button>
             </div>
+            {audioFeatures && (
+                <div>
+                    <h2>Audio Features</h2>
+                    <p>Tempo: {audioFeatures.tempo} BPM</p>
+                    <p>Danceability: {audioFeatures.danceability}</p>
+                    <p>Energy: {audioFeatures.energy}</p>
+                    <p>Valence: {audioFeatures.valence}</p>
+                    {/* Add more audio features as needed */}
+                </div>
+            )}
         </div>
     );
 };
