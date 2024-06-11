@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useSpotifyAuth } from './SpotifyContext';
+import Visualizer from './Visualizer';
 
 const Dashboard = () => {
     const { accessToken, userInfo, fetchSpotifyData } = useSpotifyAuth();
@@ -131,7 +132,6 @@ const Dashboard = () => {
         });
     };
 
-    // get audio info
     const getAudioFeatures = async (trackId) => {
         if (!accessToken) {
             console.error('No access token available');
@@ -150,7 +150,7 @@ const Dashboard = () => {
         }
 
         const data = await response.json();
-        console.log('Audio Features:', data); //log audio features
+        console.log('Audio Features:', data); // log audio features
         return data;
     };
 
@@ -198,6 +198,9 @@ const Dashboard = () => {
                     {/* Add more audio features as needed */}
                 </div>
             )}
+            <div style={{ width: '100%', height: '500px' }}> {/* container for Visualizer */}
+                <Visualizer audioFeatures={audioFeatures} /> {/* adds the Visualizer component */}
+            </div>
         </div>
     );
 };
