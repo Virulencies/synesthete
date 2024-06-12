@@ -8,9 +8,9 @@ const Visualizer = ({ audioFeatures, isPlaying, getPlayerState, colorScheme }) =
     useEffect(() => {
         const mount = mountRef.current;
 
-        // mount with defined width and height
+        // ensure mount has defined width and height
         mount.style.width = '100%';
-        mount.style.height = '500px';
+        mount.style.height = '500px'; // Set desired height
 
         // scene setup
         const scene = new THREE.Scene();
@@ -30,7 +30,7 @@ const Visualizer = ({ audioFeatures, isPlaying, getPlayerState, colorScheme }) =
         camera.position.z = 5;
 
         // calculate boundaries based on the camera frustum and cube size
-        const frustumSize = 5; // same as camera's z position - unsure why this needs to be the same but it works
+        const frustumSize = 5; // same as camera's z position
         const aspect = mount.clientWidth / mount.clientHeight;
         const boundaries = {
             left: -frustumSize * aspect / 2 + 1,
@@ -45,23 +45,27 @@ const Visualizer = ({ audioFeatures, isPlaying, getPlayerState, colorScheme }) =
             switch (colorScheme) {
                 case 'cool':
                     hue = (progress / 10000) % 1;
-                    hue = hue * 120 + 180; // blue to green to purple
+                    hue = hue * 120 + 180;
                     break;
                 case 'warm':
                     hue = (progress / 10000) % 1;
-                    hue = hue * 60; // red to orange to yellow
+                    hue = hue * 60;
+                    break;
+                case 'neutral':
+                    hue = (progress / 10000) % 1;
+                    hue = hue * 20 + 200; // removed from render for now - doesnt work yet
                     break;
                 case 'default':
                 default:
                     hue = (progress / 10000) % 1;
-                    hue = hue * 360; // all colors
+                    hue = hue * 360;
                     break;
             }
             const newColor = new THREE.Color(`hsl(${hue}, 100%, 50%)`);
             cube.material.color.set(newColor);
         };
 
-        // ANIMATION FUNCTION
+        // animation function
         const animate = async () => {
             requestAnimationFrame(animate);
 
@@ -74,7 +78,7 @@ const Visualizer = ({ audioFeatures, isPlaying, getPlayerState, colorScheme }) =
                     cube.userData.velocity.y = -cube.userData.velocity.y;
                 }
 
-                // update cube position
+                // update cube's position
                 cube.position.x += cube.userData.velocity.x;
                 cube.position.y += cube.userData.velocity.y;
 
@@ -82,7 +86,7 @@ const Visualizer = ({ audioFeatures, isPlaying, getPlayerState, colorScheme }) =
                 cube.rotation.x += cube.userData.rotationSpeed;
                 cube.rotation.y += cube.userData.rotationSpeed;
 
-                // fetch current playback state and update color
+                // fetch current playback state and update color...more of a proof of concept for more advanced, reactive behavior to be added later
                 const state = await getPlayerState();
                 if (state) {
                     const progress = state.position;
@@ -96,17 +100,17 @@ const Visualizer = ({ audioFeatures, isPlaying, getPlayerState, colorScheme }) =
         // initialize cube properties based on audio features
         const initCubeProperties = () => {
             if (audioFeatures) {
-                // set cube's velocity based on tempo non-linear
+                // set cube velocity based on tempo (enhanced difference)
                 const tempoFactor = Math.pow(audioFeatures.tempo / 120, 2.5); // Further non-linear scaling
                 cube.userData.velocity = {
-                    x: tempoFactor / 100, 
+                    x: tempoFactor / 100,
                     y: tempoFactor / 100
                 };
 
-                // set cube's rotation speed based on danceability
-                cube.userData.rotationSpeed = audioFeatures.danceability / 50;
+                // set cube rotation speed based on danceability (increase speed overall)
+                cube.userData.rotationSpeed = audioFeatures.danceability / 50; // Adjust the divisor to increase rotation speed
             } else {
-                // use default values if audioFeatures are not available
+                // default values if audioFeatures are not available for whatever reason
                 cube.userData.velocity = { x: 0.01, y: 0.01 };
                 cube.userData.rotationSpeed = 0.02;
             }
