@@ -8,6 +8,11 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+
+## Cloning the Project
+
+When cloning down the project to your machine, you only need to clone the feat/spotifyAuthentication branch - this acts as the main branch for this repo.
+
 ## Available Scripts
 
 In the project directory, you should run:
