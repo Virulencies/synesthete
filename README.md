@@ -1,10 +1,14 @@
-# Getting Started with Create React App
+# Welcome to Synesthesia ~ An audio visualizer project created with react-app and three js.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
 
-In the project directory, you can run:
+In the project directory, you should run:
+
+### 'npm install'
+
+To install all dependancies.
 
 ### `npm start`
 
@@ -14,10 +18,11 @@ Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 The page will reload when you make changes.\
 You may also see any lint errors in the console.
 
-### `npm test`
+**Note that you will need a Spotify Premium account to access the app's full functionality.**
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### `npx cypress open`
+
+Opens up Cypress. Navigate to e2e and select the spec test to run it.
 
 ### `npm run build`
 
