@@ -1,5 +1,4 @@
-# Welcome to Synesthesia ~ An audio visualizer project created with react-app and three js.
-
+# Welcome to Synesthesia ~ An audio visualizer project
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
