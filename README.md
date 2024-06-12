@@ -1,4 +1,5 @@
-# Welcome to Synesthesia ~ An audio visualizer project
+# Welcome to Synesthesia ~ An Audio Visualizer Project
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
